@@ -9,6 +9,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+plt.style.use('dark_background')
+
 from collections import Counter
 #initialise variables
 speed_state = False
@@ -156,6 +158,7 @@ async def roll(ctx,*dice):
 #_rollstat command
 @bot.command(name = 'rollstat', aliases = ['rs'] )
 async def rollstat(ctx,*dice):
+  await ctx.message.add_reaction('✅')
   for item in dice:
     typedice = item.split('d')
     typedice = [x for x in typedice if x!='']
@@ -164,8 +167,12 @@ async def rollstat(ctx,*dice):
       await ctx.send('A single dice is always equally likely on all sides')
     else:
       subresults = []
-      #roll 100000 times
-      x = np.arange(1,100001)
+      #determine roll number based on dice complexity
+      dicecomplexity = typedice[0]*typedice[1]
+#      dicecomplexity2 = dicecomplexity*typedice[0]
+#      rollnum = math.floor(9000000/dicecomplexity2)
+      rollnum = 200000
+      x = np.arange(1,rollnum)
       for element in x:
         #roll the dice as requested, add their sum to a list
         tempresults = []
@@ -176,12 +183,47 @@ async def rollstat(ctx,*dice):
         subresults.append(sum(tempresults))
       results = Counter(subresults)
       for dice_sum in results.keys():
-        results[dice_sum] = results[dice_sum]/100
-      print(results)
-      to_send = ""
-      for key,value in sorted(results.items()):
-        to_send = to_send + str(key)+ " | "+ str(value)+"\n"
-      await ctx.send(to_send)
+        results[dice_sum] = results[dice_sum]/rollnum*100
+
+      maxprob = max(results.values())
+
+      resultkeytemp = list(results.keys())
+      for key in resultkeytemp:
+        if results[key]<maxprob*0.05:
+          del results[key]
+      resultssort = sorted(results.items())
+      resultkeys = [x[0] for x in resultssort]
+      resultvalues = [x[1] for x in resultssort]
+      
+      print(resultkeys)
+    
+      height = dicecomplexity*0.66
+      scaler = 0.8+height*0.015
+      fig = plt.figure(figsize = (9*(0.8+height*0.015),height), dpi = 75)
+      ax = fig.add_subplot(111)
+      ax.barh(resultkeys,resultvalues)
+      
+      ax.set_yticks(np.arange(min(resultkeys),max(resultkeys)+1))
+      ax.set_ylabel("Roll Sum", size = 48*scaler)
+      ax.set_xlabel("Probability(%)", size = 48*scaler)
+      plt.yticks(fontsize = 36*scaler)
+      fig.tight_layout()
+      fig.savefig('test.png')
+      await ctx.send(file = discord.File('test.png'))
+
+      #plt.savefig('images/graph.png', transparent=True)
+     # plt.close(fig)
+    #  with open('images/graph.png', 'rb') as f:
+   #     file = io.BytesIO(f.read())
+        
+  #    image = discord.File(file, filename='graph.png')
+ #     embed.set_image(url=f'attachment://graph.png')
+
+#      await ctx.send(file=image, embed=embed)
+#      to_send = ""
+#      for key,value in sorted(results.items()):
+#        to_send = to_send + str(key)+ " | "+ str(value)+"\n"
+#      await ctx.send(to_send)
 
       
         
