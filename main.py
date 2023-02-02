@@ -15,12 +15,11 @@ from collections import Counter
 #initialise variables
 speed_state = False
 speed_d = {}
-game = discord.Game("something, probably")
+game = discord.Game("something, probably?")
 bot = commands.Bot(command_prefix = "_")
 res_dict = {"I":"Ineffective","E":"Endured",
             "N":"Normal","W":"Weak", "F":"Fatal"}
 char_list = []
-
 
 class character:
   def __init__(self, cha_name = 'you forgot the name, congrats!',
@@ -50,6 +49,8 @@ class character:
     embed.add_field(name =  "Resists",
                     value = f"Slash: {self.s_res}\nPierce: {self.p_res}\nBlunt: {self.b_res}")
     return embed
+
+
 
 #initialise all chara instances
 for v in db.values():
@@ -226,10 +227,20 @@ async def rollstat(ctx,*dice):
 #      await ctx.send(to_send)
 
       
+<<<<<<< Updated upstream
         
 
       
 
+=======
+      ax.set_xlabel("Probability(%) (Peak = "+"{:.2f}".format(maxprob)+")",
+      size = 48*scaler)
+      plt.yticks(fontsize = 36*scaler)
+      fig.tight_layout()
+      fig.savefig('test.png')
+      await ctx.send(file = discord.File('test.png'))      
+            
+>>>>>>> Stashed changes
 #_reg command
 @bot.command(name = 'reg', help = 'Syntax: _reg [name] [S/W/D/C] [S/P/B] [Max HP]\nAccepted Resists are I/E/N/W/F\n\n e.g. _reg Adam 0/0/0/0 F/F/F')
 async def register(ctx, arg_name = 'Adam', stats = '0/0/0/0', resists="F/F/F", mhp = 30):
@@ -276,6 +287,88 @@ async def display_stats(ctx, name):
 #    del db[key]
 #    await ctx.send(f'Deleted {key}')
 
+<<<<<<< Updated upstream
+=======
+#args 0 is the command (add,remove), 1 is the item, 2 is the qty
+
+#load the charinvs dictionary
+if 'inv_char_list' in db.keys():
+  charinvs = db['inv_char_list']
+else:
+  charinvs = {}
+#_inv command
+@bot.command(name = "inventory", aliases = ['inv'])
+async def inventory(ctx, char, *args):
+  #check for checkinv first, then if not, process qty
+  if len(args)==0:#if no item specified
+    print("no optional arguments found, checking for character")
+    #check if character exists, if so, print inv
+    if char in charinvs.keys():
+      print("Character found")
+      print(charinvs[char])
+      embed = discord.Embed(title = f"{char}\'s Inventory", color=0x29ff73)
+      to_send = ""
+      if len(charinvs[char].keys())!=0:
+        for item in charinvs[char].keys():
+          to_send+=f"{item}, {charinvs[char][item]}x\n\n"
+        embed.add_field(name = "-----------------", value = to_send, inline = False)
+        await ctx.send(embed = embed)
+
+      else:
+        await ctx.send(f"{char}\'s inventory is empty!")
+    #if not, create chara and add it to dict of charas
+    else:
+      print("Character not found, created new character")
+      charinvs[char]={}
+      await ctx.send(f"Created a new character, {char}")
+      
+  elif len(args)==2:#if no quantity specified
+    print("no qty detected, set to 1")
+    qty=1
+  else:
+    qty = int(args[2])
+  #then, look for add/remove cases
+  if len(args)==2 or len(args)==3: #that is, if the item is specified with a command, qty not required
+    if args[0]=="add":
+      print("inv add command detected")
+      if args[1] in charinvs[char].keys():
+        print("item exists, adding qty")
+        charinvs[char][args[1]]=int(charinvs[char][args[1]])+qty
+        if qty<0:
+          process = "removed from"
+        else:
+          process = "added to"
+        qty_message = str(abs(qty))
+
+        await ctx.send("**"+qty_message+" "+args[1]+"** "+process+f" {char}\'s inventory")
+
+        if charinvs[char][args[1]]==0:
+          del charinvs[char][args[1]]
+#        else:
+#          await ctx.send(f"**{args[1]}** quantity updated to **{int(charinvs[char][args[1]])}**")
+      else:
+        print("added new item to inv")
+        charinvs[char][args[1]]=qty
+        await ctx.send(f"**{qty} {args[1]}** added to {char}\'s  inventory")
+    elif args[0]=="remove":
+      print("remove command detected")
+      if args[1] in charinvs[char]:
+        del charinvs[char][args[1]]
+        print("item deleted")
+        await ctx.send(f"**{args[1]}** deleted from {char}\'s inventory")
+      else:
+        print("item not found in inventory")
+        await ctx.send("Item not found, check spelling?")
+    elif args[0]=="DELETE":
+      del charinvs[char]
+    db["inv_char_list"] = charinvs
+    print("Database updated")
+
+@bot.command (name = "invdisplay")
+async def invdisplay(ctx):
+  await ctx.send(db["inv_char_list"])
+
+>>>>>>> Stashed changes
 #custom commands
 @bot.event
 async def on_message(message):
@@ -286,7 +379,14 @@ async def on_message(message):
     if message.content == "hi":
       print('hi detected')
       await message.add_reaction('👀')
+<<<<<<< Updated upstream
 
+=======
+    
+    if message.content == "a":
+      print('a detected')
+      await message.add_reaction('🦈')
+>>>>>>> Stashed changes
     if message.author != bot.user and '_' in message.content:
         content = message.content
         author = message.author
